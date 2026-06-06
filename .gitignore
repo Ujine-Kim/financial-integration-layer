@@ -1,0 +1,14 @@
+__pycache__/
+*.pyc
+*.pyo
+.env
+airflow/logs/*
+.ruff_cache/
+.mypy_cache/
+.pytest_cache/
+*.egg-info/
+dist/
+.venv/
+venv/
+*.iml
+.idea/

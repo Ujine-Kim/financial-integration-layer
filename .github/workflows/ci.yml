@@ -1,0 +1,82 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+jobs:
+
+  # ── Линтер ────────────────────────────────────────────────────────────────
+  lint:
+    name: Lint (ruff)
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Cache pip
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-ruff-${{ hashFiles('src/requirements.txt') }}
+          restore-keys: ${{ runner.os }}-pip-ruff-
+
+      - name: Install ruff
+        run: pip install ruff==0.4.4
+
+      - name: Check code style
+        run: ruff check src/ tests/ airflow/dags/
+
+      - name: Check formatting
+        run: ruff format --check src/ tests/
+
+  # ── Unit тесты ────────────────────────────────────────────────────────────
+  test:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Cache pip
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          # Кэш инвалидируется при изменении requirements.txt
+          key: ${{ runner.os }}-pip-${{ hashFiles('src/requirements.txt') }}
+          restore-keys: ${{ runner.os }}-pip-
+
+      - name: Install dependencies
+        run: pip install -r src/requirements.txt
+
+      - name: Run unit tests
+        run: python -m pytest tests/unit/ -v --tb=short
+
+  # ── Docker Compose валидация ───────────────────────────────────────────────
+  validate-docker:
+    name: Validate Docker Compose
+    runs-on: ubuntu-latest
+    # Запускаем только после успешного lint и test
+    needs: [lint, test]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate docker-compose syntax
+        run: docker compose config
+
+      - name: Build images (without cache)
+        # Проверяем что образы собираются — но не запускаем
+        # Airflow образ большой, поэтому timeout 10 минут
+        run: docker compose build --no-cache
+        timeout-minutes: 10

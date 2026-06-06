@@ -1,0 +1,28 @@
+# Kafka
+confluent-kafka==2.4.0
+
+# HTTP
+requests==2.31.0
+
+# Валидация данных
+pydantic==2.7.1
+pydantic-settings==2.2.1
+
+# Переменные окружения
+python-dotenv==1.0.1
+
+# Retry логика
+tenacity==8.3.0
+
+# Структурированное логирование
+structlog==24.1.0
+
+# Spark
+pyspark==3.5.1
+
+# Тесты
+pytest==8.2.0
+pytest-mock==3.14.0
+
+# Линтер (dev)
+ruff==0.4.4

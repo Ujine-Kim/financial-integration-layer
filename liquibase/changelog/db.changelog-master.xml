@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <!--
+        Мастер-файл — только включает остальные файлы в нужном порядке.
+        Сами SQL-ы здесь не пишем.
+
+        Порядок важен: сначала hubs (нет FK),
+        потом links (ссылаются на hubs),
+        потом satellites (ссылаются на hubs и links).
+    -->
+
+    <include file="changelog/v001_create_hubs.sql"
+             relativeToChangelogFile="false"/>
+
+    <include file="changelog/v002_create_links.sql"
+             relativeToChangelogFile="false"/>
+
+    <include file="changelog/v003_create_satellites.sql"
+             relativeToChangelogFile="false"/>
+
+</databaseChangeLog>
