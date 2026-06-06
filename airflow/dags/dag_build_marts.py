@@ -11,7 +11,7 @@ from datetime import datetime, timezone
 from airflow.operators.python import PythonOperator
 from airflow.providers.postgres.operators.postgres import PostgresOperator
 
-from airflow.dags.base.base_dag import create_dag
+from base.base_dag import create_dag
 
 dag = create_dag(
     dag_id="build_dm_marts",

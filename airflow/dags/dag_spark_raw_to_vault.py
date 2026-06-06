@@ -14,7 +14,7 @@ from airflow.operators.bash import BashOperator
 from airflow.operators.python import PythonOperator
 from airflow.providers.postgres.hooks.postgres import PostgresHook
 
-from airflow.dags.base.base_dag import create_dag
+from base.base_dag import create_dag
 
 dag = create_dag(
     dag_id="spark_raw_to_vault",

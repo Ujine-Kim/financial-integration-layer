@@ -4,6 +4,9 @@ confluent-kafka==2.4.0
 # HTTP
 requests==2.31.0
 
+# PostgreSQL
+psycopg2-binary==2.9.9
+
 # Валидация данных
 pydantic==2.7.1
 pydantic-settings==2.2.1

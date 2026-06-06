@@ -58,6 +58,17 @@ class SparkJob(ABC):
             SparkSession.builder
             .appName(self.app_name)
             .master(master)
+            # ── Сеть — фиксируем localhost на Windows ────────────────────
+            # На Windows с WSL/Hyper-V Spark может выбрать неверный
+            # сетевой интерфейс. Принудительно используем 127.0.0.1.
+            .config("spark.driver.host", "localhost")
+            .config("spark.driver.bindAddress", "127.0.0.1")
+            # ── JDBC драйверы ────────────────────────────────────────────
+            # Spark скачает JAR из Maven при первом запуске (~автоматически)
+            .config(
+                "spark.jars.packages",
+                "org.postgresql:postgresql:42.7.3"
+            )
             # ── MinIO / S3A ──────────────────────────────────────────────
             .config("spark.hadoop.fs.s3a.endpoint", settings.minio_endpoint)
             .config("spark.hadoop.fs.s3a.access.key", settings.minio_access_key)

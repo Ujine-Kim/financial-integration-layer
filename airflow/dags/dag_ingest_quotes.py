@@ -17,7 +17,7 @@ from airflow.operators.python import PythonOperator
 from airflow.operators.trigger_dagrun import TriggerDagRunOperator
 from airflow.sensors.python import PythonSensor
 
-from airflow.dags.base.base_dag import create_dag
+from base.base_dag import create_dag
 
 # ── DAG ────────────────────────────────────────────────────────────────────
 

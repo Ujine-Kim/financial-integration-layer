@@ -10,6 +10,8 @@ import logging
 from datetime import date
 from decimal import Decimal, InvalidOperation
 
+import time
+
 import requests
 import structlog
 from tenacity import (
@@ -61,7 +63,13 @@ class AlphaVantageProducer(BaseProducer):
         self._log.info("fetch_started", symbols=self.symbols)
         success_count = 0
 
-        for symbol in self.symbols:
+        for i, symbol in enumerate(self.symbols):
+            # Бесплатный план: не более 25 запросов в день и ~5 запросов в минуту
+            # Ждём 15 секунд между запросами чтобы не получить rate limit
+            if i > 0:
+                self._log.info("rate_limit_pause", seconds=15, symbol=symbol)
+                time.sleep(15)
+
             try:
                 quote = self._fetch_latest_quote(symbol)
                 if quote:
@@ -125,6 +133,11 @@ class AlphaVantageProducer(BaseProducer):
         if "Note" in data:
             # "Note" появляется при превышении лимита запросов
             self._log.warning("api_rate_limit", symbol=symbol, message=data["Note"])
+            return None
+
+        if "Information" in data:
+            # "Information" — тоже rate limit, другой формат сообщения
+            self._log.warning("api_rate_limit", symbol=symbol, message=data["Information"])
             return None
 
         time_series = data.get("Time Series (Daily)", {})

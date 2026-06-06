@@ -117,11 +117,10 @@ class LoadSatQuotePrices(SparkJob):
             .option("dbtable", "vault.sat_quote_prices")
             .load()
             .filter(F.col("trade_date") == F.lit(self.execution_date))
-            .select("hub_instrument_hk", "trade_date", "hash_diff")
+            .select("hub_instrument_hk", "load_date", "trade_date", "hash_diff")  # load_date нужен для сортировки
         )
 
         # Берём только самую последнюю запись для каждого инструмента+дата
-        # (на случай если satellite уже содержит несколько версий)
         window = Window.partitionBy("hub_instrument_hk", "trade_date").orderBy(
             F.col("load_date").desc()
         )
@@ -130,7 +129,7 @@ class LoadSatQuotePrices(SparkJob):
             sat_df
             .withColumn("rn", F.row_number().over(window))
             .filter(F.col("rn") == 1)
-            .drop("rn")
+            .select("hub_instrument_hk", "trade_date", "hash_diff")  # убираем служебные колонки
         )
 
     # ── Трансформации ──────────────────────────────────────────────────────

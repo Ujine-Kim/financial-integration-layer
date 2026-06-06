@@ -3,7 +3,10 @@
 # ─────────────────────────────────────────────
 
 x-airflow-common: &airflow-common
-  image: apache/airflow:2.9.2-python3.11
+  build:
+    context: ./airflow
+    dockerfile: Dockerfile
+  image: fil-airflow:latest
   env_file: .env
   environment:
     AIRFLOW__CORE__EXECUTOR: LocalExecutor
@@ -12,6 +15,11 @@ x-airflow-common: &airflow-common
     AIRFLOW__CORE__LOAD_EXAMPLES: "false"
     AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres:5432/airflow
     AIRFLOW__WEBSERVER__SECRET_KEY: "changeme"
+    PYTHONPATH: "/opt/airflow"
+    KAFKA_BOOTSTRAP_SERVERS: "kafka:9092"
+    JAVA_HOME: "/usr/local/java"
+    DWH_HOST: "postgres"
+    AIRFLOW_CONN_DWH_POSTGRES: "postgresql://dwh:dwh@postgres:5432/dwh"
   volumes:
     - ./airflow/dags:/opt/airflow/dags
     - ./src:/opt/airflow/src
@@ -165,8 +173,29 @@ services:
       airflow-init:
         condition: service_completed_successfully
 
+  # ── Metabase ────────────────────────────────
+  metabase:
+    image: metabase/metabase:latest
+    container_name: fil-metabase
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      MB_DB_TYPE: postgres
+      MB_DB_DBNAME: metabase
+      MB_DB_PORT: 5432
+      MB_DB_USER: postgres
+      MB_DB_PASS: postgres
+      MB_DB_HOST: postgres
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - metabase-data:/metabase-data
+
 volumes:
   postgres-data:
   kafka-data:
   minio-data:
   airflow-logs:
+  metabase-data:
